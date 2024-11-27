@@ -10,4 +10,26 @@
     9. (Optional) Create an obstacle in the parking lot which can represent trees, use A* algorithm to move the car towards the parking space.
 """
 
+# importing Libraries
+
+import random
+import numpy as np 
+import time
+import matplotlib.pyplot as plt
+from mesa import Agent, Model
+from mesa.time import RandomActivation
+from mesa.space import MultiGrid
+from mesa.datacollection import DataCollector
+
+# Creating Car Agent
+class Car(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+    self.parked = False
+    self.steps = 0
+
+    def sttep(self):
+
+
+
 
