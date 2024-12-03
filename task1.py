@@ -11,7 +11,6 @@
 """
 
 # importing Libraries
-import random
 import nest_asyncio
 from mesa import Agent, Model
 from mesa.time import RandomActivation
@@ -23,15 +22,19 @@ from mesa.visualization.ModularVisualization import ModularServer
 # nest_asyncio to prevent event loop issues
 nest_asyncio.apply()
 
-# Creating the ParkingSpace Agent each with a unique ID 
 class ParkingSpace(Agent):
+    """
+    Creating the ParkingSpace Agent each with a unique ID.     
+    """
     def __init__(self, unique_id, model, location):
         super().__init__(unique_id, model)
         self.location = location # The parking space's position on the grid
         self.occupied = False # Determines if the parking space is occupied or not
 
-# Creating the Car Agent, each with a unique ID
 class Car(Agent):
+    """
+    Creating the Car Agent, each with a unique ID    
+    """
     def __init__(self, unique_id, model, location):
         super().__init__(unique_id, model)
         self.location = location # The current position of the car on the grid
@@ -39,9 +42,11 @@ class Car(Agent):
         self.parking_step = 0
         self.parked = False # Indicates if the car is currently parked, or need to keep searching
 
-    
+
     def move(self):
-        # An array containing all the possible steps
+        """
+        Function to move the car in a random direction and check if it has reached a parking space.
+        """
         possible_steps = [
             (0, 1),  # Move up
             (0, -1), # Move down
@@ -55,40 +60,47 @@ class Car(Agent):
             dx, dy = self.random.choice(possible_steps)
             new_x = (self.location[0] + dx) % self.model.grid.width # wrap around horizontally
             new_y = (self.location[1] + dy) % self.model.grid.height # wrap around vertically
-        
-            self.location = (new_x, new_y)
-            self.model.grid.move_agent(self.location)
+            new_pos = (new_x, new_y)
+
+            self.model.grid.move_agent(self, new_pos)
+            self.location = new_pos  # Update the car's location attribute
             self.steps_taken += 1
 
-            if(self.location in parking_locations):
-                self.parked = True
+            if new_pos in parking_locations:
+                self.parked = True 
         else:
             self.parking_step += 1
             if  self.parking_step > self.model.random.randint(3, 6):
                 self.parked = False
                 self.parking_step = 0
                 
-
+    def step(self):
+        """Move the truck for one step and increment the steps_taken attribute."""
+        # if self.steps_taken < self.model.n_steps:
+        self.move()
         
     # def leave_parking(self):
     #     self.parked = False
-    #     self.parking_step = 0
+    #     self.parking_step = 0 
     #     self.step()
         
     # def step(self):
     #     if not self.parked:
     #         self.move()
-    #     else: 
+    #     else:
     #         self.parking_step += 1
     #         if self.parking_step > self.model.random.randint(3, 6):
     #             self.leave_parking()
 
 # List for holding parking spaces
-parking_locations = []
-                
+parking_locations = []   
 # ParkingLot Model Class
-class ParkingLot(Model):
+class ParkingLot(Model):  
+    """
+    Model class for the Parking Lot Model, which contains the grid and schedule.
+    """
     def __init__(self, width, height, n_cars, n_parking_spaces):
+        super().__init__()
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
         self.datacollector = DataCollector(
@@ -126,18 +138,21 @@ class ParkingLot(Model):
 # Unoccupied parking spaces = Green
 # Occupied parking spaces = Red
 def agent_portrayal(agent):
+    """"
+    Function to determine how agents are displayed in the visualization.
+    """
     portrayal = {}
     
     if isinstance(agent, Car):
-        portrayal = {"Shape": "circle", "Color": "blue", "r": 0.7, "Layer": 1}
+        portrayal = {"Shape": "circle", "Color": "blue", "Filled": "True", "r": 0.5, "Layer": 1}
     elif isinstance(agent, ParkingSpace):
         portrayal = {
             "Shape": "rect", 
             "Color": "green" if not agent.occupied else "red", 
             "Filled": "true", 
             "Layer": 0,
-            "w": 0.5,
-            "h": 0.5
+            "w": 1,
+            "h": 1
             }
         
     return portrayal
@@ -150,3 +165,4 @@ server = ModularServer(ParkingLot, [canvas_element], "Parking Lot Model",
 server.port = 8521
 
 server.launch()
+

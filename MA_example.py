@@ -14,7 +14,7 @@ nest_asyncio.apply()
 # --- Agent Definitions ---
 class Truck(Agent):
     """A truck agent that moves randomly for a given number of steps."""
-    
+       
     def __init__(self, unique_id, model, location):
         super().__init__(unique_id, model)
         self.location = location  # Location of the truck on the grid
