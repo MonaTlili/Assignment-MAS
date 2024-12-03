@@ -23,9 +23,9 @@ from mesa.visualization.ModularVisualization import ModularServer
 # nest_asyncio to prevent event loop issues
 nest_asyncio.apply()
 
-# Creating the ParkingSpace Agent each with a unique ID
+# Creating the ParkingSpace Agent each with a unique ID 
 class ParkingSpace(Agent):
-    def __init__(self, unique_id, model, location, occupied):
+    def __init__(self, unique_id, model, location):
         super().__init__(unique_id, model)
         self.location = location # The parking space's position on the grid
         self.occupied = False # Determines if the parking space is occupied or not
@@ -49,27 +49,39 @@ class Car(Agent):
             (-1, 0)  # Move left
         ]
 
-        # Choose a random direction to move
-        dx, dy = self.random.choice(possible_steps)
-        new_x = (self.location[0] + dx) % self.model.grid.width # wrap around horizontally
-        new_y = (self.location[1] + dy) % self.model.grid.height # wrap around vertically
-        
-        self.location = (new_x, new_y)
-        self.model.grid.move_agent(self. self.location)
-        self.steps_taken += 1
-        
-    def leave_parking(self):
-        self.parked = False
-        sel
-        self.step()
-        
-    def step(self):
         if not self.parked:
-            self.move()
-        else: 
+
+            # Choose a random direction to move
+            dx, dy = self.random.choice(possible_steps)
+            new_x = (self.location[0] + dx) % self.model.grid.width # wrap around horizontally
+            new_y = (self.location[1] + dy) % self.model.grid.height # wrap around vertically
+        
+            self.location = (new_x, new_y)
+            self.model.grid.move_agent(self.location)
+            self.steps_taken += 1
+
+            if(self.location in parking_locations):
+                self.parked = True
+        else:
             self.parking_step += 1
-            if self.parking_step > self.model.random.randint(3, 6):
-                self.leave_parking()
+            if  self.parking_step > self.model.random.randint(3, 6):
+                self.parked = False
+                self.parking_step = 0
+                
+
+        
+    # def leave_parking(self):
+    #     self.parked = False
+    #     self.parking_step = 0
+    #     self.step()
+        
+    # def step(self):
+    #     if not self.parked:
+    #         self.move()
+    #     else: 
+    #         self.parking_step += 1
+    #         if self.parking_step > self.model.random.randint(3, 6):
+    #             self.leave_parking()
 
 # List for holding parking spaces
 parking_locations = []
@@ -101,8 +113,8 @@ class ParkingLot(Model):
         # Add cars
         for i in range(n_cars):
             x, y = self.random.randrange(width), self.random.randrange(height)
-            car = Car(i , self.n_parking_spaces, self)
-            self.schedule.add(car) # Lägg till bilen i schemat
+            car = Car(i , self, location=(x, y))
+            #self.schedule.add(car) # Lägg till bilen i schemat
             self.grid.place_agent(car, (x, y)) # Placera bilen i griden
 
     def step(self):
@@ -136,4 +148,5 @@ canvas_element = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
 server = ModularServer(ParkingLot, [canvas_element], "Parking Lot Model",
                            {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 5})
 server.port = 8521
+
 server.launch()
