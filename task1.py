@@ -2,12 +2,16 @@
     1. Create at least 10 cars/vehicles as agents.
     2. Create at least 5 parking spaces as agents.
     3. Create a parking lot model using multigrid.
-    4. At each step the car should move and find the parking space. You can decide how the car moves to reach the parking space.
+    4. At each step the car should move and find the parking space. 
+    You can decide how the car moves to reach the parking space.
     5. Let the car leave the parking space after 3 to 5 steps.
-    6. Store the data on steps using data collector and show how many steps it took the cars to occupy a parking space.
+    6. Store the data on steps using data collector and 
+    show how many steps it took the cars to occupy a parking space.
     7. Display this simulation graphically.
-    8. Increase or decrease parking spaces and cars and see how it simulates. Provide your reflection on this.
-    9. (Optional) Create an obstacle in the parking lot which can represent trees, use A* algorithm to move the car towards the parking space.
+    8. Increase or decrease parking spaces and cars and see how it simulates. 
+    Provide your reflection on this.
+    9. (Optional) Create an obstacle in the parking lot which can represent trees, 
+    use A* algorithm to move the car towards the parking space.
 """
 
 # importing Libraries
@@ -21,6 +25,9 @@ from mesa.visualization.ModularVisualization import ModularServer
 
 # nest_asyncio to prevent event loop issues
 nest_asyncio.apply()
+
+# List for holding parking spaces
+parking_spaces = []
 
 class ParkingSpace(Agent):
     """
@@ -66,24 +73,24 @@ class Car(Agent):
             self.location = new_pos  # Update the car's location attribute
             self.steps_taken += 1
 
-            if new_pos in parking_locations:
-                self.parked = True 
+            if new_pos in parking_spaces:
+                self.parked = True
         else:
             self.parking_step += 1
             if  self.parking_step > self.model.random.randint(3, 6):
                 self.parked = False
                 self.parking_step = 0
-                
+
     def step(self):
         """Move the truck for one step and increment the steps_taken attribute."""
         # if self.steps_taken < self.model.n_steps:
         self.move()
-        
+
     # def leave_parking(self):
     #     self.parked = False
-    #     self.parking_step = 0 
+    #     self.parking_step = 0
     #     self.step()
-        
+
     # def step(self):
     #     if not self.parked:
     #         self.move()
@@ -92,10 +99,8 @@ class Car(Agent):
     #         if self.parking_step > self.model.random.randint(3, 6):
     #             self.leave_parking()
 
-# List for holding parking spaces
-parking_locations = []   
 # ParkingLot Model Class
-class ParkingLot(Model):  
+class ParkingLot(Model):
     """
     Model class for the Parking Lot Model, which contains the grid and schedule.
     """
@@ -103,14 +108,19 @@ class ParkingLot(Model):
         super().__init__()
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
+        # self.datacollector = DataCollector(
+        #     agent_reporters={"StepsTaken": "steps_taken"}
+        # )
         self.datacollector = DataCollector(
-            agent_reporters={"StepsTaken": "steps_taken"}
+            agent_reporters={
+                "StepsTaken": lambda agent: agent.steps_taken if isinstance(agent, Car) else None
+            }
         )
         self.n_cars = n_cars
         self.n_parking_spaces = n_parking_spaces
-    
+
         self.running = True
-    
+
         # Add parking spaces
         for i in range(n_parking_spaces):
             x, y = self.random.randrange(width), self.random.randrange(height)
@@ -118,15 +128,14 @@ class ParkingLot(Model):
             self.schedule.add(parking_space)
             self.grid.place_agent(parking_space, (x, y))
 
-            # spara parkeringsplatser i en lista så bilarna vet om de är parkerade eller inte 
-            parking_locations.append(parking_space.location)
+            # spara parkeringsplatser i en lista så bilarna vet om de är parkerade eller inte
+            parking_spaces.append(parking_space)
 
-            
         # Add cars
         for i in range(n_cars):
             x, y = self.random.randrange(width), self.random.randrange(height)
-            car = Car(i , self, location=(x, y))
-            #self.schedule.add(car) # Lägg till bilen i schemat
+            car = Car(i + n_parking_spaces , self, location=(x, y))
+            self.schedule.add(car) # Lägg till bilen i schemat
             self.grid.place_agent(car, (x, y)) # Placera bilen i griden
 
     def step(self):
@@ -142,7 +151,7 @@ def agent_portrayal(agent):
     Function to determine how agents are displayed in the visualization.
     """
     portrayal = {}
-    
+
     if isinstance(agent, Car):
         portrayal = {"Shape": "circle", "Color": "blue", "Filled": "True", "r": 0.5, "Layer": 1}
     elif isinstance(agent, ParkingSpace):
@@ -154,7 +163,7 @@ def agent_portrayal(agent):
             "w": 1,
             "h": 1
             }
-        
+
     return portrayal
 
 # Create the grid for visualization 10x10 grid for example
@@ -164,5 +173,4 @@ server = ModularServer(ParkingLot, [canvas_element], "Parking Lot Model",
                            {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 5})
 server.port = 8521
 
-server.launch()
-
+server.launch() # Trailing whitespace is recommended in PY for compatibility reasons -- Nicklas
