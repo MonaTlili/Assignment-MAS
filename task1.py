@@ -73,31 +73,30 @@ class Car(Agent):
             self.location = new_pos  # Update the car's location attribute
             self.steps_taken += 1
 
-            if new_pos in parking_spaces:
-                self.parked = True
-        else:
-            self.parking_step += 1
-            if  self.parking_step > self.model.random.randint(3, 6):
-                self.parked = False
-                self.parking_step = 0
+            # Check if the car has found an unoccupied parking space
+            for agent in self.model.grid.get_cell_list_contents([new_pos]):
+                if isinstance(agent, ParkingSpace) and not agent.occupied:
+                    agent.occupied = True
+                    self.parked = True
+                    self.parking_step = 0 # Reset the parking step counter
+                    break
+            
+            if self.parked:
+            # Increment parking step counter
+                self.parking_step += 1
+                if self.parking_step > self.model.random.randint(3, 6):
+                    # Leave the parking space
+                    for agent in self.model.grid.get_cell_list_contents([self.location]):
+                        if isinstance(agent, ParkingSpace) and agent.occupied:
+                            agent.occupied = False
+                            break
+                    self.parked = False
+                    self.parking_step = 0
 
     def step(self):
         """Move the truck for one step and increment the steps_taken attribute."""
         # if self.steps_taken < self.model.n_steps:
         self.move()
-
-    # def leave_parking(self):
-    #     self.parked = False
-    #     self.parking_step = 0
-    #     self.step()
-
-    # def step(self):
-    #     if not self.parked:
-    #         self.move()
-    #     else:
-    #         self.parking_step += 1
-    #         if self.parking_step > self.model.random.randint(3, 6):
-    #             self.leave_parking()
 
 # ParkingLot Model Class
 class ParkingLot(Model):
