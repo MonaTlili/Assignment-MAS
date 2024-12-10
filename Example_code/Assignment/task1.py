@@ -73,14 +73,14 @@ class Car(Agent):
                     self.model.grid.move_agent(self, new_pos)
                     self.location = new_pos
                     self.steps_taken += 1
-                    self.current_steps += 1
+                    self.current_steps += 1 
                     break  
 
             # Check if the car has found an unoccupied parking space
             for agent in self.model.grid.get_cell_list_contents([self.location]):
                 if isinstance(agent, ParkingSpace) and not agent.occupied:
                     agent.occupied = True
-                    self.parked = True
+                    self.parked = True 
                     self.parking_step = 0 # Reset the parking step counter
                     self.steps_to_park.append(self.current_steps) # Save the number of steps it took to park
                     print(f"Agent {agent.unique_id} found a parking spot after {self.current_steps} steps.")

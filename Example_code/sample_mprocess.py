@@ -15,7 +15,7 @@ from multiprocessing import Pool, cpu_count
 
 file_path = r"C:\Users\Thomas Stabforsmo\OneDrive - Högskolan Dalarna\Systemvetenskapliga\Termin 5\GIK2NX - Distributed Computing\Assignments\Assignment01\pg2701.txt"
 with open(file_path, "r", encoding="utf-8") as file:
-    sample_text = file.read()
+    sample_text = file.read() 
 
 # Splitting the text into sentences for smaller chunks of data
 text_chunks = sample_text.split('.')
