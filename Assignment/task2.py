@@ -92,10 +92,9 @@ class CooperativeTaskModel(Model):
             self.agents.append(agent)
             self.grid.place_agent(agent, (i, height // 2))  # Place agents on the grid
             
-            
         self.running = True 
         
-    def step(self):
+    def step(self): 
         print(f'{"-"*10} Step {self.schedule.steps + 1} {"-"*10}')
         self.schedule.step()
         

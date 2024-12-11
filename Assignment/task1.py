@@ -189,7 +189,7 @@ def agent_portrayal(agent):
             }
     elif isinstance(agent, Tree):
         portrayal = {"Shape": "rect", 
-                     "Color": "brown", 
+                     "Color": "grey", 
                      "Filled": "true", 
                      "Layer": 0, 
                      "w": 1, 
@@ -201,7 +201,7 @@ def agent_portrayal(agent):
 canvas_element = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
 
 server = ModularServer(ParkingLot, [canvas_element], "Parking Lot Model",
-                           {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 5, "n_trees": 5})
+                           {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 2, "n_trees": 5})
 server.port = 8521
 
 server.launch() # Trailing whitespace is recommended in PY for compatibility reasons -- Nicklas
