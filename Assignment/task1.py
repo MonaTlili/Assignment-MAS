@@ -37,6 +37,12 @@ class ParkingSpace(Agent):
         self.location = location # The parking space's position on the grid
         self.occupied = False # Determines if the parking space is occupied or not
 
+class Tree(Agent):
+    """Tree agent that acts as an obstacle in the parking lot."""
+    def __init__(self, unique_id, model, location):
+        super().__init__(unique_id, model)
+        self.location = location
+
 class Car(Agent):
     """Creating the Car Agent, each with a unique ID"""
     def __init__(self, unique_id, model, location):
@@ -68,7 +74,7 @@ class Car(Agent):
 
                 # Check if the cell is empty
                 cell_contents = self.model.grid.get_cell_list_contents([new_pos])
-                if not any(isinstance(agent, Car) for agent in cell_contents):
+                if not any(isinstance(agent, (Car, Tree)) for agent in cell_contents):
                     # Move to the new position
                     self.model.grid.move_agent(self, new_pos)
                     self.location = new_pos
@@ -108,7 +114,7 @@ class Car(Agent):
 # ParkingLot Model Class
 class ParkingLot(Model):
     """Model class for the Parking Lot Model, which contains the grid and schedule."""
-    def __init__(self, width, height, n_cars, n_parking_spaces):
+    def __init__(self, width, height, n_cars, n_parking_spaces, n_trees):
         super().__init__()
         self.grid = MultiGrid(width, height, True)
         self.schedule = RandomActivation(self)
@@ -126,17 +132,27 @@ class ParkingLot(Model):
         # Add parking spaces
         for i in range(n_parking_spaces):
             x, y = self.random.randrange(width), self.random.randrange(height)
+            while any(isinstance(agent, ParkingSpace) for agent in self.grid.get_cell_list_contents([(x, y)])):
+                x, y = self.random.randrange(width), self.random.randrange(height)
             parking_space = ParkingSpace(i, self, location=(x, y))
             self.schedule.add(parking_space)
             self.grid.place_agent(parking_space, (x, y))
             parking_spaces.append(parking_space) # Save parking spaces in a list so cars know if they are parked or not   
-            
+
+        for i in range(n_trees):
+            x, y = self.random.randrange(width), self.random.randrange(height)
+            while any(isinstance(agent, (Tree, ParkingSpace)) for agent in self.grid.get_cell_list_contents([(x, y)])):
+                x, y = self.random.randrange(width), self.random.randrange(height)
+            tree = Tree(i + n_cars + n_parking_spaces, self, location=(x, y))
+            self.schedule.add(tree)
+            self.grid.place_agent(tree, (x, y))
+
         # Add cars
         for i in range(n_cars):
             x, y = self.random.randrange(width), self.random.randrange(height)
             car = Car(i + n_parking_spaces , self, location=(x, y))
-            while any(isinstance(agent, Car) for agent in self.grid.get_cell_list_contents([(x, y)])):
-                # Ensure cars do not start in the same position
+            while any(isinstance(agent, (Car, ParkingSpace, Tree)) for agent in self.grid.get_cell_list_contents([(x, y)])):
+                # Ensure neither cars, trees or parkingSpace are in the same spot
                 x, y = self.random.randrange(width), self.random.randrange(height)
             self.schedule.add(car) # Add the car to the schedule
             self.grid.place_agent(car, (x, y)) # Place the car on the grid 
@@ -149,12 +165,18 @@ class ParkingLot(Model):
 # Cars = blue circles
 # Unoccupied parking spaces = Green
 # Occupied parking spaces = Red
+# Trees = Brown
 def agent_portrayal(agent):
     """"Function to determine how agents are displayed in the visualization."""
     portrayal = {}
 
     if isinstance(agent, Car):
-        portrayal = {"Shape": "circle", "Color": "blue", "Filled": "True", "r": 0.5, "Layer": 1, "Label": agent.unique_id}
+        portrayal = {"Shape": "circle", 
+                     "Color": "blue", 
+                     "Filled": "True", 
+                     "r": 0.5, 
+                     "Layer": 1, 
+                     "Label": agent.unique_id}
     elif isinstance(agent, ParkingSpace):
         portrayal = { 
             "Shape": "rect", 
@@ -165,6 +187,13 @@ def agent_portrayal(agent):
             "w": 1,
             "h": 1
             }
+    elif isinstance(agent, Tree):
+        portrayal = {"Shape": "rect", 
+                     "Color": "brown", 
+                     "Filled": "true", 
+                     "Layer": 0, 
+                     "w": 1, 
+                     "h": 1}
  
     return portrayal
 
@@ -172,7 +201,7 @@ def agent_portrayal(agent):
 canvas_element = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
 
 server = ModularServer(ParkingLot, [canvas_element], "Parking Lot Model",
-                           {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 5})
+                           {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 5, "n_trees": 5})
 server.port = 8521
 
 server.launch() # Trailing whitespace is recommended in PY for compatibility reasons -- Nicklas

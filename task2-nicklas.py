@@ -83,27 +83,18 @@ class CooperativeTaskModel(Model):
         self.agents = []
         capacities = [2, 1, 2] # Example capacities for agents, could be [1, 2, 1] or any other combination, with maximum capacity of 2 / agent
         for i in range(num_agents):
-            # agent = WorkerAgent(i, self, random.randint(1, 3))
-            # x = self.random.randrange(self.grid.width)
-            # y = self.random.randrange(self.grid.height)
-            # self.grid.place_agent(agent, (x, y))
-            agent = WorkerAgent(i, self, capacity=capacities[i])
+            agent = WorkerAgent(i, self, random.randint(1, 3))
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+            self.grid.place_agent(agent, (x, y))
             self.schedule.add(agent)
-            self.agents.append(agent)
-            self.grid.place_agent(agent, (i, height // 2))  # Place agents on the grid
             
-            
-        self.running = True 
-        
-    def step(self):
-        print(f'{"-"*10} Step {self.schedule.steps + 1} {"-"*10}')
-        self.schedule.step()
-        
+        self.running = True
     
-def generate_tasks():
+def generate_tasks(num_tasks = 50):
     """Generates a list of tasks with varying duration and resource requirements."""
     tasks = []
-    for i in range(50):
+    for i in range(num_tasks):
         duration = random.randint(5, 20)
         resources = random.randint(1, 3)
         tasks.append(Task(i, duration, resources))
@@ -117,7 +108,7 @@ def agent_portrayal(agent):
     if isinstance(agent, WorkerAgent):
         task_count = len(agent.current_task)
         portrayal["Color"] = "red" if task_count > 1 else "green" if task_count == 1 else "blue"
-        portrayal["Layer"] = 1 
+        portrayal["Layer"] = 1
         portrayal["Label"] = f"{len(agent.current_task)} tasks"
         
     return portrayal 

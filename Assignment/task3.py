@@ -13,11 +13,11 @@ from multiprocessing import Pool, cpu_count
 
 file_path = 'https://raw.githubusercontent.com/MonaTlili/Assignment-MAS/refs/heads/main/Moby_dick/pg2701.txt'
 response = requests.get(file_path, timeout=10) # Timeout is counted in seconds
-sample_text = response.text
+sample_text = response.text 
 
 # Splitting the text into sentences for smaller chunks of data
 text_cleaned = sample_text.replace('!', '.').replace('?', '.')
-text_chunks = text_cleaned.split('.')
+text_chunks = text_cleaned.split('.') 
 
 # Map function to process a chunk of text
 def map_function(chunk):
