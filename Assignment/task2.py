@@ -28,3 +28,46 @@
         Agent 4 is working on Task 1, Task Duration: 3
         Agent 3 is working on Task 0, Task Duration: 2
 """
+# Importing required libraries
+import random
+import nest_asyncio
+from multiprocessing import Pool, cpu_count
+from mesa import Agent, Model
+from mesa.time import RandomActivation
+from mesa.space import MultiGrid
+from mesa.datacollection import DataCollector
+from mesa.visualization.modules import CanvasGrid
+from mesa.visualization.ModularVisualization import ModularServer 
+
+# nest_asyncio to prevent event loop issues
+nest_asyncio.apply()
+
+# Task Class
+class Task:
+    """Represents a task with a duration and resource requirement."""
+    def __init__(self, task_id, duration, resources):
+        self.task_id = task_id
+        self.duration = duration
+        self.resources = resources
+        self.remaining_duration = duration  # Tracks task progress
+
+# Worker Agent Class
+class WorkerAgent(Agent):
+    """An agent that can work on tasks."""
+    
+class CooperativeTaskModel(Model):
+    """A model for cooperative task scheduling."""
+    
+def agent_portrayal(agent):
+    """Determines how agents are displayed in the visualization."""    
+
+
+    # Visualization
+    canvas_element = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
+    
+    server = ModularServer(CooperativeTaskModel, [canvas_element], "Cooperative Task Model",
+                           {"width": 10, "height": 10, "num_agents": 3, "task_list": generate_tasks()})
+    
+    server.port = 8521
+    
+    server.launch()

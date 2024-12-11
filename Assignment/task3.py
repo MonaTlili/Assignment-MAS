@@ -8,11 +8,8 @@
 
 import time
 import requests
+import re
 from multiprocessing import Pool, cpu_count
-
-# file_path = r'https://raw.githubusercontent.com/MonaTlili/Assignment-MAS/refs/heads/main/Moby_dick/pg2701.txt'
-# with open(file_path, "r", encoding="utf-8") as file:
-#     sample_text = file.read()
 
 file_path = 'https://raw.githubusercontent.com/MonaTlili/Assignment-MAS/refs/heads/main/Moby_dick/pg2701.txt'
 response = requests.get(file_path, timeout=10) # Timeout is counted in seconds
@@ -25,16 +22,15 @@ text_chunks = text_cleaned.split('.')
 # Map function to process a chunk of text
 def map_function(chunk):
     word_counts = {}
-    words = chunk.split()
+    cleaned_chunk = re.sub(r'[^\w\s]', '', chunk.lower())  
+    cleaned_chunk = re.sub(r'_', '', cleaned_chunk)      # Weird, but NEEDED to remove the _ <-- bastards
+    words = cleaned_chunk.split()  
 
     for word in words:
-        word = word.lower().strip(""" ,.()!?*'“”’}{ """)  # Cleaning the word
-        if word:
-            word_counts[word] = word_counts.get(word, 0) + 1
+        word_counts[word] = word_counts.get(word, 0) + 1
 
     return word_counts
 
-# Function to combine results (shuffle and reduce)
 def combine_results(results):
     combined_counts = {}
 
@@ -59,12 +55,12 @@ def parallel_mapreduce(text_chunks):
 # Single-threaded version of word count
 def single_threaded_word_count(text):
     word_counts = {}
-    words = text.split()
+    cleaned_chunk = re.sub(r'[^\w\s]', '', text.lower())  
+    cleaned_chunk = re.sub(r'_', '', cleaned_chunk)      # Weird, but NEEDED to remove the _ <-- "bastards"
+    words = cleaned_chunk.split()  
 
     for word in words:
-        word = word.lower().strip(""" ,.()!?*'“”’}{ """)
-        if word:
-            word_counts[word] = word_counts.get(word, 0) + 1
+        word_counts[word] = word_counts.get(word, 0) + 1
 
     return word_counts
 
@@ -74,13 +70,9 @@ if __name__ == "__main__":
     text = sample_text
     chunks = text_chunks
 
-    print("Starting performance comparison...\n")
-
-    # Single-threaded execution 
-    # start_time = time.time()
-    # single_threaded_counts = single_threaded_word_count(text)
-    # single_threaded_duration = time.time() - start_time
+    print("Starting performance comparison...\n") 
     
+    # Single-threaded (MapReduce) execution with performance counter instead of time
     start_time = time.perf_counter()
     single_threaded_counts = single_threaded_word_count(text)
     single_threaded_duration = time.perf_counter() - start_time
@@ -88,12 +80,8 @@ if __name__ == "__main__":
     print("Single-threaded Word Count:")
     print(single_threaded_counts)
     print(f"Single-threaded Duration: {single_threaded_duration:.6f} seconds\n")
-
-    # Multi-threaded (MapReduce) execution
-    # start_time = time.time()
-    # parallel_counts = parallel_mapreduce(chunks)
-    # parallel_duration = time.time() - start_time
     
+    # Multi-threaded (MapReduce) execution with performance counter instead of time
     start_time = time.perf_counter()
     parallel_counts = parallel_mapreduce(chunks)
     parallel_duration = time.perf_counter() - start_time
