@@ -115,7 +115,7 @@ def agent_portrayal(agent):
     
     if isinstance(agent, WorkerAgent):
         task_count = len(agent.current_task)
-        portrayal["Color"] = "red" if task_count > 1 else "green" if task_count == 1 else "blue"
+        portrayal["Color"] = "green" if task_count > 1 else "yellow" if task_count == 1 else "gray"
         portrayal["Layer"] = 1 
         portrayal["Label"] = f"{len(agent.current_task)} tasks"
         

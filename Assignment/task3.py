@@ -13,18 +13,19 @@ from multiprocessing import Pool, cpu_count
 
 file_path = 'https://raw.githubusercontent.com/MonaTlili/Assignment-MAS/refs/heads/main/Moby_dick/pg2701.txt'
 response = requests.get(file_path, timeout=10) # Timeout is counted in seconds
-sample_text = response.text 
+sample_text = response.text
+# sample_text = sample_text * 100 # IF USING text_cleaned.split('  ') FOR MOR EFFECTIVE MULTI-PROCESS
 
 # Splitting the text into sentences for smaller chunks of data
 text_cleaned = sample_text.replace('!', '.').replace('?', '.')
-text_chunks = text_cleaned.split('.') 
+text_chunks = text_cleaned.split('.')
 
 # Map function to process a chunk of text
 def map_function(chunk):
     word_counts = {}
     cleaned_chunk = re.sub(r'[^\w\s]', '', chunk.lower())  
     cleaned_chunk = re.sub(r'_', '', cleaned_chunk)      # Weird, but NEEDED to remove the _ <-- bastards
-    words = cleaned_chunk.split()  
+    words = cleaned_chunk.split()
 
     for word in words:
         word_counts[word] = word_counts.get(word, 0) + 1
