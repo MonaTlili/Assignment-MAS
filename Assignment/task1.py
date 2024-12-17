@@ -1,19 +1,3 @@
-"""    
-    1. Create at least 10 cars/vehicles as agents.
-    2. Create at least 5 parking spaces as agents.
-    3. Create a parking lot model using multigrid.
-    4. At each step the car should move and find the parking space. 
-    You can decide how the car moves to reach the parking space.
-    5. Let the car leave the parking space after 3 to 5 steps.
-    6. Store the data on steps using data collector and 
-    show how many steps it took the cars to occupy a parking space.
-    7. Display this simulation graphically.
-    8. Increase or decrease parking spaces and cars and see how it simulates. 
-    Provide your reflection on this. 
-    9. (Optional) Create an obstacle in the parking lot which can represent trees, 
-    use A* algorithm to move the car towards the parking space.
-"""
-
 # importing Libraries 
 import nest_asyncio
 from mesa import Agent, Model
@@ -24,7 +8,7 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer 
 
 
-# nest_asyncio to prevent event loop issues
+# nest_asyncio to prevent event loop issues, when running the code in environments like Jupyter Notebook
 nest_asyncio.apply()
 
 # List for holding parking spaces
@@ -165,7 +149,7 @@ class ParkingLot(Model):
 # Cars = blue circles
 # Unoccupied parking spaces = Green
 # Occupied parking spaces = Red
-# Trees = Brown
+# Trees = Grey rectangles (silver pine trees)
 def agent_portrayal(agent):
     """"Function to determine how agents are displayed in the visualization."""
     portrayal = {}
@@ -201,7 +185,7 @@ def agent_portrayal(agent):
 canvas_element = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
 
 server = ModularServer(ParkingLot, [canvas_element], "Parking Lot Model",
-                           {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 2, "n_trees": 5})
+                           {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 5, "n_trees": 5})
 server.port = 8521
 
-server.launch() # Trailing whitespace is recommended in PY for compatibility reasons -- Nicklas
+server.launch()

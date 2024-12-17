@@ -1,30 +1,23 @@
-"""
-    1. Use the textfile named “pg2701”
-    2. Split the text file to chunks (group of sentences)
-    3. Clean the data and count the words using single and multi-thread
-    4. Identify processing times between them
-    5. Explain the difference in performance
-"""
-
+# Importing required libraries
 import time
 import requests
 import re
 from multiprocessing import Pool, cpu_count
 
+# Downloading the text file from GitHub
 file_path = 'https://raw.githubusercontent.com/MonaTlili/Assignment-MAS/refs/heads/main/Moby_dick/pg2701.txt'
 response = requests.get(file_path, timeout=10) # Timeout is counted in seconds
 sample_text = response.text
-# sample_text = sample_text * 100 # IF USING text_cleaned.split('  ') FOR MOR EFFECTIVE MULTI-PROCESS
 
 # Splitting the text into sentences for smaller chunks of data
 text_cleaned = sample_text.replace('!', '.').replace('?', '.')
 text_chunks = text_cleaned.split('.')
 
-# Map function to process a chunk of text
+# Map function to process a chunk of text, clean the text (by removing punctuations/underscores and converting to lowercase) and count word occurrences
 def map_function(chunk):
     word_counts = {}
     cleaned_chunk = re.sub(r'[^\w\s]', '', chunk.lower())  
-    cleaned_chunk = re.sub(r'_', '', cleaned_chunk)      # Weird, but NEEDED to remove the _ <-- bastards
+    cleaned_chunk = re.sub(r'_', '', cleaned_chunk)     
     words = cleaned_chunk.split()
 
     for word in words:
@@ -32,6 +25,7 @@ def map_function(chunk):
 
     return word_counts
 
+# Combine function to merge word counts from multiple map results
 def combine_results(results):
     combined_counts = {}
 
@@ -43,8 +37,10 @@ def combine_results(results):
 
 # Parallel MapReduce implementation
 def parallel_mapreduce(text_chunks):
+    
     # Create a multiprocessing pool with the number of available CPU cores
     with Pool(cpu_count()) as pool:
+        
         # Step 1: Map phase - distribute chunks to multiple processes
         map_results = pool.map(map_function, text_chunks)
 
@@ -57,7 +53,7 @@ def parallel_mapreduce(text_chunks):
 def single_threaded_word_count(text):
     word_counts = {}
     cleaned_chunk = re.sub(r'[^\w\s]', '', text.lower())  
-    cleaned_chunk = re.sub(r'_', '', cleaned_chunk)      # Weird, but NEEDED to remove the _ <-- "bastards"
+    cleaned_chunk = re.sub(r'_', '', cleaned_chunk)      
     words = cleaned_chunk.split()  
 
     for word in words:
@@ -65,8 +61,9 @@ def single_threaded_word_count(text):
 
     return word_counts
 
-# Performance testing
+# Testing the performance of the single-threaded and parallel implementations"
 if __name__ == "__main__":
+    
     # Test data
     text = sample_text
     chunks = text_chunks
