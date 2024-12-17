@@ -164,7 +164,6 @@ def agent_portrayal(agent):
     elif isinstance(agent, ParkingSpace):
         portrayal = { 
             "Shape": "rect", 
-            # "Color": "green" if not agent.occupied else "red", # and isinstance(agent, Car) is agent.parked
             "Color": "red" if agent.occupied else "green", 
             "Filled": "true", 
             "Layer": 0,
@@ -185,7 +184,7 @@ def agent_portrayal(agent):
 canvas_element = CanvasGrid(agent_portrayal, 10, 10, 500, 500)
 
 server = ModularServer(ParkingLot, [canvas_element], "Parking Lot Model",
-                           {"width": 10, "height": 10, "n_cars": 10, "n_parking_spaces": 5, "n_trees": 5})
+                           {"width": 10, "height": 10, "n_cars": 5, "n_parking_spaces": 10, "n_trees": 5})
 server.port = 8521
 
 server.launch()
